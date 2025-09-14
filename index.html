@@ -19,7 +19,7 @@
       <a href="verify.html" class="px-10 py-4 bg-gradient-to-r from-pink-600 to-purple-700 hover:from-pink-700 hover:to-purple-800 rounded-2xl shadow-lg text-lg font-semibold transition">
         ⬇ Download for Windows
       </a>
-      <!-- 🔴 New Live Auction Button -->
+      <!-- 🔴 Live Auction Button -->
       <a id="auctionBtn" href="nothing.html" class="px-10 py-4 bg-gradient-to-r from-purple-600 to-pink-700 hover:from-purple-700 hover:to-pink-800 rounded-2xl shadow-lg text-lg font-semibold transition">
         🎥 View Auctions Live
       </a>
@@ -91,23 +91,36 @@
     © 2025 BidArena. All rights reserved. 
   </footer>
 
-  <!-- JS to fetch live auction link -->
+  <!-- JS to fetch live auction link and skip ngrok warning -->
   <script>
     const BLOB_URL = "https://jsonblob.com/api/jsonBlob/1416737738698448896";
+    const btn = document.getElementById("auctionBtn");
 
     async function checkAuction() {
       try {
         const res = await fetch(BLOB_URL);
         const data = await res.json();
-        const btn = document.getElementById("auctionBtn");
+
         if (data.url && data.url !== "nothing") {
-          btn.href = data.url;
+          // Override click to skip ngrok warning
+          btn.onclick = async (e) => {
+            e.preventDefault(); // prevent default navigation
+            try {
+              await fetch(data.url, {
+                headers: { "ngrok-skip-browser-warning": "1" }
+              });
+              window.location.href = data.url;
+            } catch (err) {
+              console.error("Error navigating to live auction:", err);
+              window.location.href = "nothing.html";
+            }
+          };
         } else {
           btn.href = "nothing.html";
         }
       } catch (err) {
         console.error("Error fetching auction URL", err);
-        document.getElementById("auctionBtn").href = "nothing.html";
+        btn.href = "nothing.html";
       }
     }
 
